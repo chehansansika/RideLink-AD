@@ -1,0 +1,19 @@
+package com.ridelink.farepayment.repository;
+
+import com.ridelink.farepayment.model.Payment;
+import com.ridelink.farepayment.model.PaymentStatus;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface PaymentRepository extends MongoRepository<Payment, String> {
+
+    List<Payment> findByRideId(String rideId);
+
+    Optional<Payment> findByTransactionReference(String transactionReference);
+
+    boolean existsByRideIdAndPaymentStatus(String rideId, PaymentStatus paymentStatus);
+}
