@@ -1,0 +1,128 @@
+{
+  "info": {
+    "name": "RideLink - Fare & Payment Service",
+    "description": "Comprehensive Postman collection for testing the RideLink Fare & Payment Service REST APIs.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Estimate Fare",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"pickupLocation\": \"Colombo Fort Railway Station\",\n  \"dropoffLocation\": \"Galle Face Green, Colombo\",\n  \"distanceKm\": 5.5\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8084/api/fares/estimate",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8084",
+          "path": ["api", "fares", "estimate"]
+        }
+      }
+    },
+    {
+      "name": "2. Calculate Final Fare",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rideId\": \"ride-101\",\n  \"passengerId\": \"passenger-501\",\n  \"distanceKm\": 8.2\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8084/api/fares/calculate",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8084",
+          "path": ["api", "fares", "calculate"]
+        }
+      }
+    },
+    {
+      "name": "3. Get Fare by Ride ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8084/api/fares/ride/ride-101",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8084",
+          "path": ["api", "fares", "ride", "ride-101"]
+        }
+      }
+    },
+    {
+      "name": "4. Record Payment (Card)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rideId\": \"ride-101\",\n  \"passengerId\": \"passenger-501\",\n  \"amount\": 453.0,\n  \"paymentMethod\": \"CARD\",\n  \"simulateFailure\": false\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8084/api/payments",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8084",
+          "path": ["api", "payments"]
+        }
+      }
+    },
+    {
+      "name": "5. Record Payment (Simulate Failure)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rideId\": \"ride-102\",\n  \"passengerId\": \"passenger-502\",\n  \"amount\": 300.0,\n  \"paymentMethod\": \"CARD\",\n  \"simulateFailure\": true\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8084/api/payments",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8084",
+          "path": ["api", "payments"]
+        }
+      }
+    },
+    {
+      "name": "6. Get Payments by Ride ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8084/api/payments/ride/ride-101",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8084",
+          "path": ["api", "payments", "ride", "ride-101"]
+        }
+      }
+    },
+    {
+      "name": "7. Get Receipt by Ride ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8084/api/receipts/ride/ride-101",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8084",
+          "path": ["api", "receipts", "ride", "ride-101"]
+        }
+      }
+    }
+  ]
+}
