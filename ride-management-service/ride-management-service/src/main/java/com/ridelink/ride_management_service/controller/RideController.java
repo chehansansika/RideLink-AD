@@ -1,7 +1,10 @@
 package com.ridelink.ride_management_service.controller;
 
-import com.ridelink.ride_management_service.model.Ride;
+import com.ridelink.ride_management_service.dto.RideRequest;
+import com.ridelink.ride_management_service.dto.RideResponse;
 import com.ridelink.ride_management_service.service.RideService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,43 +21,37 @@ public class RideController {
     }
 
     @GetMapping
-    public List<Ride> getAllRides() {
-        return rideService.getAllRides();
+    public ResponseEntity<List<RideResponse>> getAllRides() {
+        return ResponseEntity.ok(rideService.getAllRides());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Ride> getRideById(@PathVariable String id) {
-        return rideService.getRideById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<RideResponse> getRideById(@PathVariable String id) {
+        return ResponseEntity.ok(rideService.getRideById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Ride> createRide(@RequestBody Ride ride) {
-        return ResponseEntity.ok(rideService.createRide(ride));
+    public ResponseEntity<RideResponse> createRide(
+            @Valid @RequestBody RideRequest request) {
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(rideService.createRide(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Ride> updateRide(
+    public ResponseEntity<RideResponse> updateRide(
             @PathVariable String id,
-            @RequestBody Ride ride) {
+            @Valid @RequestBody RideRequest request) {
 
-        Ride updatedRide = rideService.updateRide(id, ride);
-
-        if (updatedRide == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(updatedRide);
+        return ResponseEntity.ok(rideService.updateRide(id, request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRide(@PathVariable String id) {
 
-        if (rideService.deleteRide(id)) {
-            return ResponseEntity.noContent().build();
-        }
+        rideService.deleteRide(id);
 
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.noContent().build();
     }
 }
