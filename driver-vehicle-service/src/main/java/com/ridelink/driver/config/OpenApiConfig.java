@@ -15,7 +15,7 @@ import java.util.List;
  * OpenAPI / Swagger configuration for the Driver & Vehicle Service.
  *
  * <p>Swagger UI is available at: http://localhost:8082/swagger-ui.html
- * <p>API docs are available at:  http://localhost:8082/api-docs
+ * <p>API docs are available at:  http://localhost:8082/v3/api-docs
  */
 @Configuration
 public class OpenApiConfig {

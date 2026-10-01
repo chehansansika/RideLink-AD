@@ -3,7 +3,7 @@
 ## 📌 Service Overview
 The **Driver & Vehicle Service** is a core backend microservice for the RideLink platform, developed as part of **Member 2** responsibilities. It is responsible for managing driver operational profiles, vehicle records, operational availability states, simulated driver geographical locations, service areas, and providing discovery endpoints for eligible drivers during ride matching.
 
-- **Assigned Member:** Member 2
+- **Assigned Member:** `IT24100110-Perera W.S.D.`
 - **Git Branch:** `Driver-&-Vehicle-Service`
 - **Application Name:** `driver-vehicle-service`
 - **Port:** `8082`
@@ -13,7 +13,7 @@ The **Driver & Vehicle Service** is a core backend microservice for the RideLink
 ---
 
 ## 🛠️ Technology Stack
-- **Language:** Java 17
+- **Language:** Java 21
 - **Framework:** Spring Boot 3.2.5
 - **Persistence:** Spring Data MongoDB
 - **Database:** MongoDB
@@ -140,27 +140,33 @@ The service can be configured via `src/main/resources/application.yml` or overri
 | Environment Variable | Default Value | Description |
 |---|---|---|
 | `PORT` | `8082` | HTTP Server port |
-| `MONGODB_URI` | `mongodb://localhost:27017/ridelink_driver_db` | MongoDB connection string |
+| `MONGODB_URI` | `mongodb+srv://admin:admin123@dbcluster.eutnxe9.mongodb.net/ridelink_driver_db?retryWrites=true&w=majority&appName=dbCluster` | MongoDB connection string (Atlas or local) |
 
 ---
 
 ## 🧪 How to Run and Test
 
 ### Prerequisites
-- JDK 17+
-- Maven 3.8+
-- MongoDB instance running on `localhost:27017` (or configured via `MONGODB_URI`)
+- JDK 21+
+- Maven 3.8+ (or use the included `mvnw.cmd` / `mvnw` wrapper)
+- MongoDB instance (MongoDB Atlas cluster or local `localhost:27017`)
 
 ### Running the Application
 ```bash
 cd driver-vehicle-service
+# Using Maven wrapper (recommended)
+.\mvnw.cmd spring-boot:run     # On Windows PowerShell / CMD
+./mvnw spring-boot:run        # On Linux / macOS / Git Bash
+
+# Or using globally installed Maven
 mvn spring-boot:run
 ```
 
 ### Running Unit Tests
 ```bash
 cd driver-vehicle-service
-mvn clean test
+.\mvnw.cmd clean test         # On Windows
+./mvnw clean test             # On Linux / macOS / Git Bash
 ```
 
 ### Interactive API Documentation (Swagger / OpenAPI)

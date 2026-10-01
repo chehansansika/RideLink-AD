@@ -41,6 +41,13 @@ public class GlobalExceptionHandler {
         return buildError(HttpStatus.NOT_FOUND, "Vehicle Not Found", ex.getMessage(), request.getRequestURI());
     }
 
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNoResourceFound(
+            org.springframework.web.servlet.resource.NoResourceFoundException ex, HttpServletRequest request) {
+        log.warn("Resource not found: {}", ex.getMessage());
+        return buildError(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage(), request.getRequestURI());
+    }
+
     // ------------------------------------------------------------------ //
     // 409 Conflict
     // ------------------------------------------------------------------ //
