@@ -6,12 +6,12 @@ spring:
     name: driver-vehicle-service
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/ridelink_driver_db}
+      uri: ${MONGODB_URI:mongodb+srv://admin:admin123@dbcluster.eutnxe9.mongodb.net/ridelink_driver_db?retryWrites=true&w=majority&appName=dbCluster}
       database: ${MONGODB_DATABASE:ridelink_driver_db}
 
 springdoc:
   api-docs:
-    path: /api-docs
+    path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
     operationsSorter: method
