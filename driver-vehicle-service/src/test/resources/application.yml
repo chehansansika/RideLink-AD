@@ -1,0 +1,9 @@
+spring:
+  data:
+    mongodb:
+      # Embedded MongoDB used for unit tests - no real MongoDB needed
+      auto-index-creation: true
+
+logging:
+  level:
+    com.ridelink: WARN
