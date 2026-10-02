@@ -59,7 +59,9 @@ public class FareController {
             @ApiResponse(responseCode = "404", description = "Fare record not found for ride ID",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<FareCalculationResponse> getFareByRideId(@PathVariable String rideId) {
+    public ResponseEntity<FareCalculationResponse> getFareByRideId(
+            @io.swagger.v3.oas.annotations.Parameter(description = "Identifier of the ride", schema = @Schema(defaultValue = "RIDE-TEST-1"))
+            @PathVariable String rideId) {
         return ResponseEntity.ok(fareService.getFareByRideId(rideId));
     }
 
@@ -70,7 +72,9 @@ public class FareController {
             @ApiResponse(responseCode = "404", description = "Fare record not found with ID",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<FareCalculationResponse> getFareById(@PathVariable String fareId) {
+    public ResponseEntity<FareCalculationResponse> getFareById(
+            @io.swagger.v3.oas.annotations.Parameter(description = "Database ID of the fare record", schema = @Schema(defaultValue = "6abfa4a7a6ec111867535464"))
+            @PathVariable String fareId) {
         return ResponseEntity.ok(fareService.getFareById(fareId));
     }
 }

@@ -52,7 +52,9 @@ public class PaymentController {
             @ApiResponse(responseCode = "404", description = "Payment record not found",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<PaymentResponse> getPaymentById(@PathVariable String paymentId) {
+    public ResponseEntity<PaymentResponse> getPaymentById(
+            @io.swagger.v3.oas.annotations.Parameter(description = "Database ID of the payment", schema = @Schema(defaultValue = "6abfa4f3a6ec111867535465"))
+            @PathVariable String paymentId) {
         return ResponseEntity.ok(paymentService.getPaymentById(paymentId));
     }
 
@@ -64,7 +66,9 @@ public class PaymentController {
             @ApiResponse(responseCode = "404", description = "No payment records found for ride ID",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<List<PaymentResponse>> getPaymentsByRideId(@PathVariable String rideId) {
+    public ResponseEntity<List<PaymentResponse>> getPaymentsByRideId(
+            @io.swagger.v3.oas.annotations.Parameter(description = "Identifier of the ride", schema = @Schema(defaultValue = "RIDE-TEST-1"))
+            @PathVariable String rideId) {
         return ResponseEntity.ok(paymentService.getPaymentsByRideId(rideId));
     }
 }

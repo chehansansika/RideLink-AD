@@ -30,7 +30,9 @@ public class ReceiptController {
             @ApiResponse(responseCode = "404", description = "Receipt not found with specified ID",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<ReceiptResponse> getReceiptById(@PathVariable String receiptId) {
+    public ResponseEntity<ReceiptResponse> getReceiptById(
+            @io.swagger.v3.oas.annotations.Parameter(description = "Database ID of the receipt", schema = @Schema(defaultValue = "6abfa4f3a6ec111867535466"))
+            @PathVariable String receiptId) {
         return ResponseEntity.ok(receiptService.getReceiptById(receiptId));
     }
 
@@ -41,7 +43,9 @@ public class ReceiptController {
             @ApiResponse(responseCode = "404", description = "Receipt not found for payment ID",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<ReceiptResponse> getReceiptByPaymentId(@PathVariable String paymentId) {
+    public ResponseEntity<ReceiptResponse> getReceiptByPaymentId(
+            @io.swagger.v3.oas.annotations.Parameter(description = "Database ID of the payment", schema = @Schema(defaultValue = "6abfa4f3a6ec111867535465"))
+            @PathVariable String paymentId) {
         return ResponseEntity.ok(receiptService.getReceiptByPaymentId(paymentId));
     }
 
@@ -52,7 +56,9 @@ public class ReceiptController {
             @ApiResponse(responseCode = "404", description = "Receipt not found for ride ID",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<ReceiptResponse> getReceiptByRideId(@PathVariable String rideId) {
+    public ResponseEntity<ReceiptResponse> getReceiptByRideId(
+            @io.swagger.v3.oas.annotations.Parameter(description = "Identifier of the ride", schema = @Schema(defaultValue = "RIDE-TEST-1"))
+            @PathVariable String rideId) {
         return ResponseEntity.ok(receiptService.getReceiptByRideId(rideId));
     }
 }
