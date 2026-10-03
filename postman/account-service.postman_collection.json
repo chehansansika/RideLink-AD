@@ -1,0 +1,544 @@
+{
+  "info": {
+    "_postman_id": "b7c2512a-8742-45e8-b80c-783ea7483b19",
+    "name": "RideLink - Account Service API",
+    "description": "Comprehensive Postman test collection for RideLink Account Microservice (Member 1), covering positive and negative scenarios for registration, login, JWT authentication, profile management, and account lookup.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "accountId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Register Passenger (Positive)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "pm.test(\"Account response has valid fields\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData.email).to.eql('john.passenger@example.com');",
+              "    pm.expect(jsonData.role).to.eql('PASSENGER');",
+              "    pm.expect(jsonData.status).to.eql('ACTIVE');",
+              "    pm.expect(jsonData).to.not.have.property('password');",
+              "    if (jsonData.id) {",
+              "        pm.collectionVariables.set('accountId', jsonData.id);",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Perera\",\n  \"email\": \"john.passenger@example.com\",\n  \"password\": \"Password123\",\n  \"phone\": \"0771234567\",\n  \"role\": \"PASSENGER\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/accounts/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "accounts",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "2. Register Driver (Positive)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "pm.test(\"Driver account registered with DRIVER role\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.role).to.eql('DRIVER');",
+              "    pm.expect(jsonData.email).to.eql('kamal.driver@example.com');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Kamal\",\n  \"lastName\": \"Silva\",\n  \"email\": \"kamal.driver@example.com\",\n  \"password\": \"Password123\",\n  \"phone\": \"0719876543\",\n  \"role\": \"DRIVER\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/accounts/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "accounts",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Duplicate Registration (Negative)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 409 Conflict\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "pm.test(\"Error message indicates duplicate email\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.eql(409);",
+              "    pm.expect(jsonData.error).to.eql('Conflict');",
+              "    pm.expect(jsonData.message).to.include('already registered');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"John Duplicate\",\n  \"lastName\": \"Perera\",\n  \"email\": \"john.passenger@example.com\",\n  \"password\": \"Password123\",\n  \"phone\": \"0771234567\",\n  \"role\": \"PASSENGER\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/accounts/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "accounts",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. Register Validation Error (Negative)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Validation errors returned\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.eql(400);",
+              "    pm.expect(jsonData.error).to.eql('Validation Error');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"\",\n  \"lastName\": \"\",\n  \"email\": \"not-a-valid-email\",\n  \"password\": \"123\",\n  \"phone\": \"\",\n  \"role\": null\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/accounts/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "accounts",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "5. Login Passenger (Positive)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"JWT token received and stored\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('token');",
+              "    pm.expect(jsonData.email).to.eql('john.passenger@example.com');",
+              "    pm.expect(jsonData.role).to.eql('PASSENGER');",
+              "    pm.collectionVariables.set('token', jsonData.token);",
+              "    if (jsonData.accountId) {",
+              "        pm.collectionVariables.set('accountId', jsonData.accountId);",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"john.passenger@example.com\",\n  \"password\": \"Password123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/accounts/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "accounts",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "6. Login Driver (Positive)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Driver token received\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('token');",
+              "    pm.expect(jsonData.role).to.eql('DRIVER');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"kamal.driver@example.com\",\n  \"password\": \"Password123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/accounts/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "accounts",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "7. Invalid Login (Negative)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 401 Unauthorized\", function () {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "pm.test(\"Error message indicates invalid credentials\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.eql(401);",
+              "    pm.expect(jsonData.error).to.eql('Unauthorized');",
+              "    pm.expect(jsonData.message).to.eql('Invalid email or password');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"john.passenger@example.com\",\n  \"password\": \"WrongPassword999\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/accounts/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "accounts",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "8. Get Profile (Positive)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Returns authenticated user profile\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.email).to.eql('john.passenger@example.com');",
+              "    pm.expect(jsonData.role).to.eql('PASSENGER');",
+              "    pm.expect(jsonData.status).to.eql('ACTIVE');",
+              "    pm.expect(jsonData).to.not.have.property('password');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/accounts/profile",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "accounts",
+            "profile"
+          ]
+        }
+      }
+    },
+    {
+      "name": "9. Update Profile (Positive)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Updated profile returned with modified fields\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.firstName).to.eql('Johnathan');",
+              "    pm.expect(jsonData.lastName).to.eql('Perera Updated');",
+              "    pm.expect(jsonData.phone).to.eql('0779998888');",
+              "    pm.expect(jsonData.role).to.eql('PASSENGER');",
+              "    pm.expect(jsonData.status).to.eql('ACTIVE');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Johnathan\",\n  \"lastName\": \"Perera Updated\",\n  \"phone\": \"0779998888\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/accounts/profile",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "accounts",
+            "profile"
+          ]
+        }
+      }
+    },
+    {
+      "name": "10. Get Account By ID (Positive)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Safe account response without password\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get('accountId'));",
+              "    pm.expect(jsonData).to.not.have.property('password');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/accounts/{{accountId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "accounts",
+            "{{accountId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "11. Unauthorized Profile Request (Negative)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 401 Unauthorized\", function () {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "pm.test(\"Unauthorized error response format\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.eql(401);",
+              "    pm.expect(jsonData.error).to.eql('Unauthorized');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/accounts/profile",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "accounts",
+            "profile"
+          ]
+        }
+      }
+    }
+  ]
+}
