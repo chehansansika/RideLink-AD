@@ -1,0 +1,749 @@
+{
+  "info": {
+    "_postman_id": "ridelink-driver-vehicle-service",
+    "name": "RideLink — Driver & Vehicle Service",
+    "description": "Complete Postman collection for the Driver & Vehicle Service microservice.\nBase URL: http://localhost:8082\nGit Branch: Driver-&-Vehicle-Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8082",
+      "type": "string"
+    },
+    {
+      "key": "driverId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "vehicleId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Drivers",
+      "item": [
+        {
+          "name": "Create Driver (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 CREATED', () => pm.response.to.have.status(201));",
+                  "pm.test('Response has id', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.id).to.be.a('string');",
+                  "    pm.collectionVariables.set('driverId', json.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/drivers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": \"ACC001\",\n  \"name\": \"John Silva\",\n  \"phone\": \"+94771234567\",\n  \"licenseNumber\": \"LIC-12345\",\n  \"serviceArea\": \"Colombo\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Driver — Duplicate License (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 409 CONFLICT', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/drivers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": \"ACC002\",\n  \"name\": \"Another Driver\",\n  \"phone\": \"+94779999999\",\n  \"licenseNumber\": \"LIC-12345\",\n  \"serviceArea\": \"Kandy\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Driver — Validation Error (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400 BAD REQUEST', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/drivers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"phone\": \"not-a-phone\",\n  \"licenseNumber\": \"\",\n  \"serviceArea\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Driver by ID (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Driver id matches', () => {",
+                  "    pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get('driverId'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/drivers/{{driverId}}"
+          }
+        },
+        {
+          "name": "Get Driver — Not Found (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404 NOT FOUND', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/drivers/nonexistent-id-00000"
+          }
+        },
+        {
+          "name": "Get All Drivers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is an array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/drivers"
+          }
+        },
+        {
+          "name": "Update Driver (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Name updated', () => pm.expect(pm.response.json().name).to.eql('John Silva Updated'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/drivers/{{driverId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Silva Updated\",\n  \"phone\": \"+94771234568\",\n  \"serviceArea\": \"Gampaha\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Driver (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 204 NO CONTENT', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/drivers/{{driverId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vehicles",
+      "item": [
+        {
+          "name": "Register Vehicle (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 CREATED', () => pm.response.to.have.status(201));",
+                  "pm.test('Response has id', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.id).to.be.a('string');",
+                  "    pm.collectionVariables.set('vehicleId', json.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/vehicles",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"driverId\": \"{{driverId}}\",\n  \"registrationNumber\": \"CAR-WP-1234\",\n  \"vehicleType\": \"CAR\",\n  \"make\": \"Toyota\",\n  \"model\": \"Prius\",\n  \"year\": 2022,\n  \"color\": \"White\",\n  \"capacity\": 4\n}"
+            }
+          }
+        },
+        {
+          "name": "Register Vehicle — Duplicate Registration (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 409 CONFLICT', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/vehicles",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"driverId\": \"{{driverId}}\",\n  \"registrationNumber\": \"CAR-WP-1234\",\n  \"vehicleType\": \"CAR\",\n  \"make\": \"Honda\",\n  \"model\": \"Civic\",\n  \"year\": 2021,\n  \"color\": \"Black\",\n  \"capacity\": 4\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Vehicle by ID (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/vehicles/{{vehicleId}}"
+          }
+        },
+        {
+          "name": "Get Vehicle — Not Found (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404 NOT FOUND', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/vehicles/nonexistent-vehicle-id"
+          }
+        },
+        {
+          "name": "Get Vehicles for Driver",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/drivers/{{driverId}}/vehicles"
+          }
+        },
+        {
+          "name": "Update Vehicle (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/vehicles/{{vehicleId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"color\": \"Silver\",\n  \"capacity\": 5\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Availability",
+      "item": [
+        {
+          "name": "Set AVAILABLE — No Active Vehicle (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/drivers/{{driverId}}/availability",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"AVAILABLE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Set AVAILABLE (Success — after vehicle activated)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Status is AVAILABLE', () => pm.expect(pm.response.json().availabilityStatus).to.eql('AVAILABLE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/drivers/{{driverId}}/availability",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"AVAILABLE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Set BUSY",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Status is BUSY', () => pm.expect(pm.response.json().availabilityStatus).to.eql('BUSY'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/drivers/{{driverId}}/availability",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"BUSY\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Set OFFLINE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Status is OFFLINE', () => pm.expect(pm.response.json().availabilityStatus).to.eql('OFFLINE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/drivers/{{driverId}}/availability",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"OFFLINE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Set Invalid Status (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/drivers/{{driverId}}/availability",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"INVALID_STATUS\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Location",
+      "item": [
+        {
+          "name": "Update Driver Location (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Location updated', () => {",
+                  "    const loc = pm.response.json().currentLocation;",
+                  "    pm.expect(loc.latitude).to.eql(6.9271);",
+                  "    pm.expect(loc.longitude).to.eql(79.8612);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/drivers/{{driverId}}/location",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 6.9271,\n  \"longitude\": 79.8612\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Driver Location",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/drivers/{{driverId}}/location"
+          }
+        },
+        {
+          "name": "Update Location — Invalid Latitude (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/drivers/{{driverId}}/location",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 999.0,\n  \"longitude\": 79.8612\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Location — Invalid Longitude (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/drivers/{{driverId}}/location",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 6.9271,\n  \"longitude\": -999.0\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Service Area",
+      "item": [
+        {
+          "name": "Update Service Area (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Service area updated', () => pm.expect(pm.response.json().serviceArea).to.eql('Kandy'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/drivers/{{driverId}}/service-area",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceArea\": \"Kandy\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Service Area — Blank (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/drivers/{{driverId}}/service-area",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceArea\": \"\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Eligible Drivers",
+      "item": [
+        {
+          "name": "Get Eligible Drivers (All)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/drivers/eligible"
+          }
+        },
+        {
+          "name": "Get Eligible Drivers — Filter by Service Area",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('All results are in Colombo', () => {",
+                  "    pm.response.json().forEach(d => pm.expect(d.serviceArea).to.eql('Colombo'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/drivers/eligible?serviceArea=Colombo",
+              "query": [{"key": "serviceArea", "value": "Colombo"}]
+            }
+          }
+        },
+        {
+          "name": "Get Eligible Drivers — With Location Params",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/drivers/eligible?serviceArea=Colombo&latitude=6.9271&longitude=79.8612",
+              "query": [
+                {"key": "serviceArea", "value": "Colombo"},
+                {"key": "latitude", "value": "6.9271"},
+                {"key": "longitude", "value": "79.8612"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Negative Scenarios",
+      "item": [
+        {
+          "name": "Get Driver — Wrong ID (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Error body has required fields', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('timestamp');",
+                  "    pm.expect(body).to.have.property('status');",
+                  "    pm.expect(body).to.have.property('error');",
+                  "    pm.expect(body).to.have.property('message');",
+                  "    pm.expect(body).to.have.property('path');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/drivers/does-not-exist"
+          }
+        },
+        {
+          "name": "Get Vehicle — Wrong ID (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/vehicles/does-not-exist"
+          }
+        },
+        {
+          "name": "Register Vehicle — Driver Not Found (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/vehicles",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"driverId\": \"nonexistent-driver\",\n  \"registrationNumber\": \"NEW-0000\",\n  \"vehicleType\": \"CAR\",\n  \"make\": \"Toyota\",\n  \"model\": \"Corolla\",\n  \"year\": 2023,\n  \"color\": \"Red\",\n  \"capacity\": 4\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Driver — Missing Required Fields (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('fieldErrors present', () => pm.expect(pm.response.json()).to.have.property('fieldErrors'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{baseUrl}}/api/drivers",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
