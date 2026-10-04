@@ -22,10 +22,12 @@ import java.util.List;
  *
  * <p>Controller is kept thin — all business logic is delegated to {@link VehicleService}.
  */
+@CrossOrigin(origins = "*")
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Vehicles", description = "Vehicle registration, retrieval, update, and status management APIs")
 public class VehicleController {
+
 
     private final VehicleService vehicleService;
 
@@ -126,4 +128,19 @@ public class VehicleController {
             @PathVariable String vehicleId) {
         return ResponseEntity.ok(vehicleService.deactivateVehicle(vehicleId));
     }
+
+    @Operation(summary = "Delete a vehicle",
+               description = "Permanently removes a vehicle from the system.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Vehicle deleted successfully"),
+        @ApiResponse(responseCode = "404", description = "Vehicle not found")
+    })
+    @DeleteMapping("/api/vehicles/{vehicleId}")
+    public ResponseEntity<Void> deleteVehicle(
+            @Parameter(description = "Vehicle document ID", required = true)
+            @PathVariable String vehicleId) {
+        vehicleService.deleteVehicle(vehicleId);
+        return ResponseEntity.noContent().build();
+    }
 }
+

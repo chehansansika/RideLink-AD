@@ -1,13 +1,14 @@
 server:
-  port: ${SERVER_PORT:8082}
+  port: ${PORT:${SERVER_PORT:8082}}
 
 spring:
   application:
     name: driver-vehicle-service
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb+srv://admin:admin123@dbcluster.eutnxe9.mongodb.net/ridelink_driver_db?retryWrites=true&w=majority&appName=dbCluster}
+      uri: ${MONGODB_URI:mongodb+srv://admin:admin123@dbcluster.eutnxe9.mongodb.net/ridelink_driver_db?retryWrites=true&w=majority&appName=dbCluster&connectTimeoutMS=10000&serverSelectionTimeoutMS=10000}
       database: ${MONGODB_DATABASE:ridelink_driver_db}
+      auto-index-creation: false
 
 springdoc:
   api-docs:
@@ -15,8 +16,10 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     operationsSorter: method
+    tagsSorter: alpha
 
 logging:
   level:
     com.ridelink: DEBUG
     org.springframework.data.mongodb: INFO
+

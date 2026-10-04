@@ -46,4 +46,21 @@ public interface DriverRepository extends MongoRepository<Driver, String> {
      * @return list of matching drivers
      */
     List<Driver> findByAvailabilityStatusAndServiceArea(DriverAvailability status, String serviceArea);
+
+    /**
+     * Find a driver by their linked Account Service account ID.
+     *
+     * @param accountId the account ID
+     * @return an Optional containing the driver if found
+     */
+    Optional<Driver> findByAccountId(String accountId);
+
+    /**
+     * Check whether a driver with the given account ID already exists.
+     *
+     * @param accountId the account ID to check
+     * @return true if a driver with this account ID exists
+     */
+    boolean existsByAccountId(String accountId);
 }
+

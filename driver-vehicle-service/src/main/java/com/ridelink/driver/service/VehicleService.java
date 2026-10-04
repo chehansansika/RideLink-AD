@@ -42,9 +42,8 @@ public class VehicleService {
         log.debug("Registering vehicle with plate: {}", request.getRegistrationNumber());
 
         // Validate driver exists
-        if (!driverRepository.existsById(request.getDriverId())) {
-            throw new DriverNotFoundException(request.getDriverId());
-        }
+        com.ridelink.driver.model.Driver driver = driverRepository.findById(request.getDriverId())
+                .orElseThrow(() -> new DriverNotFoundException(request.getDriverId()));
 
         // Prevent duplicate registration number
         if (vehicleRepository.existsByRegistrationNumber(request.getRegistrationNumber())) {
@@ -65,6 +64,14 @@ public class VehicleService {
 
         Vehicle saved = vehicleRepository.save(vehicle);
         log.info("Vehicle registered with ID: {}", saved.getId());
+
+        // Automatically assign vehicleId to driver if driver currently has none
+        if (driver.getVehicleId() == null || driver.getVehicleId().isBlank()) {
+            driver.setVehicleId(saved.getId());
+            driverRepository.save(driver);
+            log.info("Assigned primary vehicle ID {} to driver ID {}", saved.getId(), driver.getId());
+        }
+
         return toResponse(saved);
     }
 
@@ -150,6 +157,8 @@ public class VehicleService {
 
     /**
      * Deactivate a vehicle.
+     * If the owning driver has no other active vehicles and is currently AVAILABLE,
+     * their availability status will be transitioned to OFFLINE.
      *
      * @param vehicleId the vehicle document ID
      * @return the updated vehicle response DTO
@@ -161,7 +170,50 @@ public class VehicleService {
         vehicle.setStatus(VehicleStatus.INACTIVE);
         Vehicle updated = vehicleRepository.save(vehicle);
         log.info("Vehicle ID {} deactivated", vehicleId);
+
+        if (vehicle.getDriverId() != null) {
+            boolean hasOtherActive = vehicleRepository.existsByDriverIdAndStatus(vehicle.getDriverId(), VehicleStatus.ACTIVE);
+            if (!hasOtherActive) {
+                driverRepository.findById(vehicle.getDriverId()).ifPresent(driver -> {
+                    if (driver.getAvailabilityStatus() == com.ridelink.driver.model.DriverAvailability.AVAILABLE) {
+                        driver.setAvailabilityStatus(com.ridelink.driver.model.DriverAvailability.OFFLINE);
+                        driverRepository.save(driver);
+                        log.info("Driver ID {} transitioned to OFFLINE (no active vehicles remain)", driver.getId());
+                    }
+                });
+            }
+        }
+
         return toResponse(updated);
+    }
+
+    /**
+     * Delete a vehicle by its ID.
+     *
+     * @param vehicleId the vehicle document ID
+     * @throws VehicleNotFoundException if no vehicle exists with the given ID
+     */
+    public void deleteVehicle(String vehicleId) {
+        log.debug("Deleting vehicle ID: {}", vehicleId);
+        Vehicle vehicle = findVehicleOrThrow(vehicleId);
+        String driverId = vehicle.getDriverId();
+        vehicleRepository.delete(vehicle);
+        log.info("Vehicle ID {} deleted", vehicleId);
+
+        if (driverId != null) {
+            driverRepository.findById(driverId).ifPresent(driver -> {
+                boolean hasOtherActive = vehicleRepository.existsByDriverIdAndStatus(driverId, VehicleStatus.ACTIVE);
+                if (vehicleId.equals(driver.getVehicleId())) {
+                    List<Vehicle> remaining = vehicleRepository.findByDriverId(driverId);
+                    driver.setVehicleId(remaining.isEmpty() ? null : remaining.get(0).getId());
+                }
+                if (!hasOtherActive && driver.getAvailabilityStatus() == com.ridelink.driver.model.DriverAvailability.AVAILABLE) {
+                    driver.setAvailabilityStatus(com.ridelink.driver.model.DriverAvailability.OFFLINE);
+                    log.info("Driver ID {} transitioned to OFFLINE after vehicle deletion", driverId);
+                }
+                driverRepository.save(driver);
+            });
+        }
     }
 
     // ------------------------------------------------------------------ //
@@ -190,3 +242,4 @@ public class VehicleService {
                 .build();
     }
 }
+
