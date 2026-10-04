@@ -17,10 +17,10 @@ public class ErrorResponse {
     @Schema(description = "HTTP error title", example = "Not Found")
     private String error;
 
-    @Schema(description = "Detailed error explanation message", example = "Payment not found with id: 66f91b7e...")
+    @Schema(description = "Detailed error explanation message", example = "Resource not found with id: 12345")
     private String message;
 
-    @Schema(description = "API request path that triggered error", example = "/api/payments/66f91b7e")
+    @Schema(description = "API request path that triggered error", example = "/api/resource/12345")
     private String path;
 
     @Schema(description = "Field validation errors if applicable")
