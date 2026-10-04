@@ -117,3 +117,30 @@ The service will start on port **`8084`**.
 3. **Record Simulated Payment**: Send `POST /api/payments` with `rideId`, `passengerId`, `amount`, and `paymentMethod: "CARD"`.
 4. **Retrieve Payment**: Send `GET /api/payments/{paymentId}` to inspect transaction reference and `COMPLETED` status.
 5. **Retrieve Receipt**: Send `GET /api/receipts/payment/{paymentId}` to inspect issued receipt details.
+
+---
+
+## 8. Project Structure
+
+```text
+fare-payment-service/
+├── pom.xml
+├── README.md
+├── postman/
+│   └── RideLink_FarePayment_Service.postman_collection.json
+└── src/
+    ├── main/
+    │   ├── java/com/ridelink/farepayment/
+    │   │   ├── client/       # REST clients for inter-service communication
+    │   │   ├── config/       # Application configuration (OpenAPI, properties)
+    │   │   ├── controller/   # REST API Controllers (Fare, Payment, Receipt)
+    │   │   ├── dto/          # Data Transfer Objects
+    │   │   ├── exception/    # Global exception handling
+    │   │   ├── model/        # Entities (Fare, Payment, Receipt)
+    │   │   ├── repository/   # MongoDB repositories
+    │   │   ├── service/      # Business logic services
+    │   │   └── FarePaymentServiceApplication.java
+    │   └── resources/
+    │       └── application.properties
+    └── test/                 # Unit and Integration tests
+```
