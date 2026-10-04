@@ -55,4 +55,20 @@ public interface VehicleRepository extends MongoRepository<Vehicle, String> {
      * @return true if such a vehicle exists
      */
     boolean existsByDriverIdAndStatus(String driverId, VehicleStatus status);
+
+    /**
+     * Check whether a driver has any registered vehicles.
+     *
+     * @param driverId the driver ID
+     * @return true if the driver has at least one vehicle
+     */
+    boolean existsByDriverId(String driverId);
+
+    /**
+     * Delete all vehicles belonging to a specific driver.
+     *
+     * @param driverId the driver ID
+     */
+    void deleteByDriverId(String driverId);
 }
+

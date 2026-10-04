@@ -621,10 +621,7 @@
           ],
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/drivers/eligible?serviceArea=Colombo",
-              "query": [{"key": "serviceArea", "value": "Colombo"}]
-            }
+            "url": "{{baseUrl}}/api/drivers/eligible?serviceArea=Colombo"
           }
         },
         {
@@ -641,14 +638,7 @@
           ],
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/drivers/eligible?serviceArea=Colombo&latitude=6.9271&longitude=79.8612",
-              "query": [
-                {"key": "serviceArea", "value": "Colombo"},
-                {"key": "latitude", "value": "6.9271"},
-                {"key": "longitude", "value": "79.8612"}
-              ]
-            }
+            "url": "{{baseUrl}}/api/drivers/eligible?serviceArea=Colombo&latitude=6.9271&longitude=79.8612"
           }
         }
       ]

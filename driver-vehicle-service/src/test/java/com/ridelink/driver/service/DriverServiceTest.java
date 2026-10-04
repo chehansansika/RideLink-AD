@@ -137,13 +137,35 @@ class DriverServiceTest {
         }
 
         @Test
-        @DisplayName("should throw DriverNotFoundException when driver not found")
-        void shouldThrowDriverNotFoundException() {
-            when(driverRepository.findById("NONEXISTENT")).thenReturn(Optional.empty());
+        @DisplayName("should return driver by account ID when found")
+        void shouldReturnDriverByAccountId() {
+            Driver driver = buildDriver();
+            when(driverRepository.findByAccountId("ACC001")).thenReturn(Optional.of(driver));
 
-            assertThatThrownBy(() -> driverService.getDriver("NONEXISTENT"))
-                    .isInstanceOf(DriverNotFoundException.class)
-                    .hasMessageContaining("NONEXISTENT");
+            DriverResponse response = driverService.getDriverByAccountId("ACC001");
+
+            assertThat(response.getId()).isEqualTo("DRV001");
+            assertThat(response.getAccountId()).isEqualTo("ACC001");
+        }
+
+        @Test
+        @DisplayName("should throw DriverNotFoundException when account ID not found")
+        void shouldThrowWhenAccountIdNotFound() {
+            when(driverRepository.findByAccountId("UNKNOWN_ACC")).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> driverService.getDriverByAccountId("UNKNOWN_ACC"))
+                    .isInstanceOf(DriverNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("should return all drivers")
+        void shouldReturnAllDrivers() {
+            when(driverRepository.findAll()).thenReturn(List.of(buildDriver()));
+
+            List<DriverResponse> responses = driverService.getAllDrivers();
+
+            assertThat(responses).hasSize(1);
+            assertThat(responses.get(0).getId()).isEqualTo("DRV001");
         }
     }
 
@@ -191,7 +213,56 @@ class DriverServiceTest {
             assertThatThrownBy(() -> driverService.updateDriver("DRV001", request))
                     .isInstanceOf(DuplicateDriverException.class);
         }
+
+        @Test
+        @DisplayName("should throw VehicleNotFoundException when updating with non-existent vehicleId")
+        void shouldThrowWhenVehicleIdNotFound() {
+            Driver driver = buildDriver();
+            UpdateDriverRequest request = UpdateDriverRequest.builder()
+                    .vehicleId("NONEXISTENT_VEH")
+                    .build();
+
+            when(driverRepository.findById("DRV001")).thenReturn(Optional.of(driver));
+            when(vehicleRepository.existsById("NONEXISTENT_VEH")).thenReturn(false);
+
+            assertThatThrownBy(() -> driverService.updateDriver("DRV001", request))
+                    .isInstanceOf(com.ridelink.driver.exception.VehicleNotFoundException.class);
+        }
     }
+
+    // ------------------------------------------------------------------ //
+    // Delete Driver
+    // ------------------------------------------------------------------ //
+
+    @Nested
+    @DisplayName("deleteDriver")
+    class DeleteDriver {
+
+        @Test
+        @DisplayName("should delete driver and cascade delete associated vehicles")
+        void shouldDeleteDriverAndCascadeVehicles() {
+            Driver driver = buildDriver();
+            Vehicle vehicle = Vehicle.builder().id("VEH001").driverId("DRV001").build();
+
+            when(driverRepository.findById("DRV001")).thenReturn(Optional.of(driver));
+            when(vehicleRepository.findByDriverId("DRV001")).thenReturn(List.of(vehicle));
+
+            driverService.deleteDriver("DRV001");
+
+            verify(vehicleRepository).deleteAll(List.of(vehicle));
+            verify(driverRepository).delete(driver);
+        }
+
+        @Test
+        @DisplayName("should throw DriverNotFoundException when deleting non-existent driver")
+        void shouldThrowWhenDeletingNonExistentDriver() {
+            when(driverRepository.findById("UNKNOWN")).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> driverService.deleteDriver("UNKNOWN"))
+                    .isInstanceOf(DriverNotFoundException.class);
+        }
+    }
+
 
     // ------------------------------------------------------------------ //
     // Availability
