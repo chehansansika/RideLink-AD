@@ -131,16 +131,55 @@ fare-payment-service/
 └── src/
     ├── main/
     │   ├── java/com/ridelink/farepayment/
-    │   │   ├── client/       # REST clients for inter-service communication
-    │   │   ├── config/       # Application configuration (OpenAPI, properties)
-    │   │   ├── controller/   # REST API Controllers (Fare, Payment, Receipt)
-    │   │   ├── dto/          # Data Transfer Objects
-    │   │   ├── exception/    # Global exception handling
-    │   │   ├── model/        # Entities (Fare, Payment, Receipt)
-    │   │   ├── repository/   # MongoDB repositories
-    │   │   ├── service/      # Business logic services
+    │   │   ├── client/
+    │   │   │   ├── dto/
+    │   │   │   │   └── RideDetailsDto.java
+    │   │   │   └── RideServiceClient.java
+    │   │   ├── config/
+    │   │   │   ├── FareProperties.java
+    │   │   │   ├── OpenApiConfig.java
+    │   │   │   └── RestClientConfig.java
+    │   │   ├── controller/
+    │   │   │   ├── FareController.java
+    │   │   │   ├── PaymentController.java
+    │   │   │   └── ReceiptController.java
+    │   │   ├── dto/
+    │   │   │   ├── request/
+    │   │   │   │   ├── FareEstimateRequest.java
+    │   │   │   │   ├── FinalFareCalculateRequest.java
+    │   │   │   │   └── PaymentRecordRequest.java
+    │   │   │   └── response/
+    │   │   │       ├── ErrorResponse.java
+    │   │   │       ├── FareCalculationResponse.java
+    │   │   │       ├── FareEstimateResponse.java
+    │   │   │       ├── PaymentResponse.java
+    │   │   │       └── ReceiptResponse.java
+    │   │   ├── exception/
+    │   │   │   ├── BadRequestException.java
+    │   │   │   ├── DuplicatePaymentException.java
+    │   │   │   ├── GlobalExceptionHandler.java
+    │   │   │   ├── PaymentProcessingException.java
+    │   │   │   └── ResourceNotFoundException.java
+    │   │   ├── model/
+    │   │   │   ├── Fare.java
+    │   │   │   ├── Payment.java
+    │   │   │   ├── PaymentMethod.java
+    │   │   │   ├── PaymentStatus.java
+    │   │   │   └── Receipt.java
+    │   │   ├── repository/
+    │   │   │   ├── FareRepository.java
+    │   │   │   ├── PaymentRepository.java
+    │   │   │   └── ReceiptRepository.java
+    │   │   ├── service/
+    │   │   │   ├── FareService.java
+    │   │   │   ├── PaymentService.java
+    │   │   │   └── ReceiptService.java
     │   │   └── FarePaymentServiceApplication.java
     │   └── resources/
     │       └── application.properties
-    └── test/                 # Unit and Integration tests
+    └── test/
+        └── java/com/ridelink/farepayment/service/
+            ├── FareServiceTest.java
+            ├── PaymentServiceTest.java
+            └── ReceiptServiceTest.java
 ```
