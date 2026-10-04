@@ -74,6 +74,19 @@ public class DriverService {
     }
 
     /**
+     * Retrieve a driver by their linked Account Service account ID.
+     *
+     * @param accountId the account ID
+     * @return the driver response DTO
+     * @throws DriverNotFoundException if no driver exists with the given account ID
+     */
+    public DriverResponse getDriverByAccountId(String accountId) {
+        Driver driver = driverRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new DriverNotFoundException("with account ID: " + accountId));
+        return toResponse(driver);
+    }
+
+    /**
      * Retrieve all drivers.
      *
      * @return list of all driver response DTOs
@@ -103,6 +116,12 @@ public class DriverService {
             throw new DuplicateDriverException(request.getLicenseNumber());
         }
 
+        if (request.getVehicleId() != null && !request.getVehicleId().isBlank()) {
+            if (!vehicleRepository.existsById(request.getVehicleId())) {
+                throw new com.ridelink.driver.exception.VehicleNotFoundException(request.getVehicleId());
+            }
+        }
+
         if (request.getName() != null)          driver.setName(request.getName());
         if (request.getPhone() != null)         driver.setPhone(request.getPhone());
         if (request.getLicenseNumber() != null) driver.setLicenseNumber(request.getLicenseNumber());
@@ -115,7 +134,7 @@ public class DriverService {
     }
 
     /**
-     * Delete a driver profile.
+     * Delete a driver profile and all associated vehicles.
      *
      * @param driverId the driver document ID
      * @throws DriverNotFoundException if no driver exists with the given ID
@@ -123,6 +142,11 @@ public class DriverService {
     public void deleteDriver(String driverId) {
         log.debug("Deleting driver ID: {}", driverId);
         Driver driver = findDriverOrThrow(driverId);
+        List<com.ridelink.driver.model.Vehicle> vehicles = vehicleRepository.findByDriverId(driverId);
+        if (!vehicles.isEmpty()) {
+            vehicleRepository.deleteAll(vehicles);
+            log.info("Deleted {} associated vehicles for driver ID {}", vehicles.size(), driverId);
+        }
         driverRepository.delete(driver);
         log.info("Driver ID {} deleted", driverId);
     }
@@ -133,7 +157,7 @@ public class DriverService {
 
     /**
      * Update the availability status of a driver.
-     *
+    *
      * <p>Business rules:
      * <ul>
      *   <li>Setting to {@code AVAILABLE} requires the driver to have at least one ACTIVE vehicle.</li>
@@ -255,18 +279,19 @@ public class DriverService {
         return candidates.stream()
                 .filter(d -> vehicleRepository.existsByDriverIdAndStatus(d.getId(), VehicleStatus.ACTIVE))
                 .map(d -> {
-                    // Retrieve the vehicle type from the first active vehicle
-                    String vehicleType = vehicleRepository
-                            .findByDriverIdAndStatus(d.getId(), VehicleStatus.ACTIVE)
-                            .stream()
-                            .findFirst()
-                            .map(v -> v.getVehicleType())
-                            .orElse("UNKNOWN");
+                    List<com.ridelink.driver.model.Vehicle> activeVehicles = vehicleRepository
+                            .findByDriverIdAndStatus(d.getId(), VehicleStatus.ACTIVE);
+
+                    com.ridelink.driver.model.Vehicle activeVehicle = activeVehicles.stream().findFirst().orElse(null);
+                    String vehicleType = activeVehicle != null ? activeVehicle.getVehicleType() : "UNKNOWN";
+                    String vehicleId = (d.getVehicleId() != null && !d.getVehicleId().isBlank())
+                            ? d.getVehicleId()
+                            : (activeVehicle != null ? activeVehicle.getId() : null);
 
                     return EligibleDriverResponse.builder()
                             .driverId(d.getId())
                             .name(d.getName())
-                            .vehicleId(d.getVehicleId())
+                            .vehicleId(vehicleId)
                             .vehicleType(vehicleType)
                             .serviceArea(d.getServiceArea())
                             .availabilityStatus(d.getAvailabilityStatus())
@@ -301,3 +326,4 @@ public class DriverService {
                 .build();
     }
 }
+

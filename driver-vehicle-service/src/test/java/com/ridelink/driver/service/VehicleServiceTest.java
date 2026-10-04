@@ -85,12 +85,16 @@ class VehicleServiceTest {
     class CreateVehicle {
 
         @Test
-        @DisplayName("should register vehicle successfully")
+        @DisplayName("should register vehicle and link to driver when driver has no vehicle")
         void shouldCreateVehicle() {
             CreateVehicleRequest request = buildCreateRequest();
             Vehicle saved = buildVehicle();
+            com.ridelink.driver.model.Driver driver = com.ridelink.driver.model.Driver.builder()
+                    .id("DRV001")
+                    .vehicleId(null)
+                    .build();
 
-            when(driverRepository.existsById("DRV001")).thenReturn(true);
+            when(driverRepository.findById("DRV001")).thenReturn(Optional.of(driver));
             when(vehicleRepository.existsByRegistrationNumber("CAR-1234")).thenReturn(false);
             when(vehicleRepository.save(any(Vehicle.class))).thenReturn(saved);
 
@@ -100,14 +104,17 @@ class VehicleServiceTest {
             assertThat(response.getId()).isEqualTo("VEH001");
             assertThat(response.getRegistrationNumber()).isEqualTo("CAR-1234");
             assertThat(response.getStatus()).isEqualTo(VehicleStatus.ACTIVE);
+            assertThat(driver.getVehicleId()).isEqualTo("VEH001");
+            verify(driverRepository).save(driver);
         }
 
         @Test
         @DisplayName("should throw DuplicateVehicleException when registration number already exists")
         void shouldThrowDuplicateVehicleException() {
             CreateVehicleRequest request = buildCreateRequest();
+            com.ridelink.driver.model.Driver driver = com.ridelink.driver.model.Driver.builder().id("DRV001").build();
 
-            when(driverRepository.existsById("DRV001")).thenReturn(true);
+            when(driverRepository.findById("DRV001")).thenReturn(Optional.of(driver));
             when(vehicleRepository.existsByRegistrationNumber("CAR-1234")).thenReturn(true);
 
             assertThatThrownBy(() -> vehicleService.createVehicle(request))
@@ -122,7 +129,7 @@ class VehicleServiceTest {
         void shouldThrowDriverNotFoundException() {
             CreateVehicleRequest request = buildCreateRequest();
 
-            when(driverRepository.existsById("DRV001")).thenReturn(false);
+            when(driverRepository.findById("DRV001")).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> vehicleService.createVehicle(request))
                     .isInstanceOf(DriverNotFoundException.class);
@@ -230,18 +237,26 @@ class VehicleServiceTest {
         }
 
         @Test
-        @DisplayName("should deactivate an active vehicle")
-        void shouldDeactivateVehicle() {
+        @DisplayName("should deactivate an active vehicle and set driver offline if no active vehicles remain")
+        void shouldDeactivateVehicleAndSetDriverOffline() {
             Vehicle vehicle = buildVehicle();
-
             Vehicle deactivated = buildVehicle();
             deactivated.setStatus(VehicleStatus.INACTIVE);
 
+            com.ridelink.driver.model.Driver driver = com.ridelink.driver.model.Driver.builder()
+                    .id("DRV001")
+                    .availabilityStatus(com.ridelink.driver.model.DriverAvailability.AVAILABLE)
+                    .build();
+
             when(vehicleRepository.findById("VEH001")).thenReturn(Optional.of(vehicle));
             when(vehicleRepository.save(any())).thenReturn(deactivated);
+            when(vehicleRepository.existsByDriverIdAndStatus("DRV001", VehicleStatus.ACTIVE)).thenReturn(false);
+            when(driverRepository.findById("DRV001")).thenReturn(Optional.of(driver));
 
             VehicleResponse response = vehicleService.deactivateVehicle("VEH001");
             assertThat(response.getStatus()).isEqualTo(VehicleStatus.INACTIVE);
+            assertThat(driver.getAvailabilityStatus()).isEqualTo(com.ridelink.driver.model.DriverAvailability.OFFLINE);
+            verify(driverRepository).save(driver);
         }
 
         @Test
@@ -250,6 +265,47 @@ class VehicleServiceTest {
             when(vehicleRepository.findById("NONE")).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> vehicleService.activateVehicle("NONE"))
+                    .isInstanceOf(VehicleNotFoundException.class);
+        }
+    }
+
+    // ------------------------------------------------------------------ //
+    // Delete Vehicle
+    // ------------------------------------------------------------------ //
+
+    @Nested
+    @DisplayName("deleteVehicle")
+    class DeleteVehicle {
+
+        @Test
+        @DisplayName("should delete vehicle and update driver reference")
+        void shouldDeleteVehicle() {
+            Vehicle vehicle = buildVehicle();
+            com.ridelink.driver.model.Driver driver = com.ridelink.driver.model.Driver.builder()
+                    .id("DRV001")
+                    .vehicleId("VEH001")
+                    .availabilityStatus(com.ridelink.driver.model.DriverAvailability.AVAILABLE)
+                    .build();
+
+            when(vehicleRepository.findById("VEH001")).thenReturn(Optional.of(vehicle));
+            when(driverRepository.findById("DRV001")).thenReturn(Optional.of(driver));
+            when(vehicleRepository.existsByDriverIdAndStatus("DRV001", VehicleStatus.ACTIVE)).thenReturn(false);
+            when(vehicleRepository.findByDriverId("DRV001")).thenReturn(List.of());
+
+            vehicleService.deleteVehicle("VEH001");
+
+            verify(vehicleRepository).delete(vehicle);
+            assertThat(driver.getVehicleId()).isNull();
+            assertThat(driver.getAvailabilityStatus()).isEqualTo(com.ridelink.driver.model.DriverAvailability.OFFLINE);
+            verify(driverRepository).save(driver);
+        }
+
+        @Test
+        @DisplayName("should throw VehicleNotFoundException when deleting non-existent vehicle")
+        void shouldThrowWhenDeletingNonExistentVehicle() {
+            when(vehicleRepository.findById("NONE")).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> vehicleService.deleteVehicle("NONE"))
                     .isInstanceOf(VehicleNotFoundException.class);
         }
     }
@@ -282,3 +338,4 @@ class VehicleServiceTest {
         }
     }
 }
+

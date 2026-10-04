@@ -23,6 +23,7 @@ import java.util.List;
  *
  * <p>Controller is kept thin — all business logic is delegated to {@link DriverService}.
  */
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/drivers")
 @RequiredArgsConstructor
@@ -50,6 +51,20 @@ public class DriverController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(summary = "Get driver by Account ID",
+               description = "Retrieves the driver profile linked to a specific Account Service account ID.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Driver found",
+                     content = @Content(schema = @Schema(implementation = DriverResponse.class))),
+        @ApiResponse(responseCode = "404", description = "Driver not found for account ID")
+    })
+    @GetMapping("/account/{accountId}")
+    public ResponseEntity<DriverResponse> getDriverByAccountId(
+            @Parameter(description = "Account Service Account ID", required = true)
+            @PathVariable String accountId) {
+        return ResponseEntity.ok(driverService.getDriverByAccountId(accountId));
+    }
+
     @Operation(summary = "Get driver by ID",
                description = "Retrieves the profile of a specific driver.")
     @ApiResponses({
@@ -63,6 +78,7 @@ public class DriverController {
             @PathVariable String driverId) {
         return ResponseEntity.ok(driverService.getDriver(driverId));
     }
+
 
     @Operation(summary = "Get all drivers",
                description = "Retrieves a list of all driver profiles.")
